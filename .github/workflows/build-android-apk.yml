@@ -42,7 +42,9 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleFossDebug
+          sed -i '/^org.gradle.jvmargs=/d' gradle.properties
+          printf '\norg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8\n' >> gradle.properties
+          ./gradlew --no-daemon --max-workers=2 assembleFossDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
