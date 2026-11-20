@@ -7,7 +7,7 @@ on:
       ref:
         description: Source tag or branch
         required: true
-        default: v1.0.4
+        default: oneui9-redesign
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: librepods-org/librepods
+          repository: ${{ github.repository }}
           ref: ${{ inputs.ref }}
           submodules: recursive
 

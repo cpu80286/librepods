@@ -37,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -112,7 +113,8 @@ fun StyledIconButton(
                     FilledTonalIconButton(
                         onClick = onClick,
                         enabled = enabled,
-                        modifier = Modifier.size(52.dp)
+                        modifier = Modifier.size(52.dp),
+                        shape = IconButtonDefaults.mediumRoundShape
                     ) {
                         Text(
                             text = icon,
@@ -127,7 +129,8 @@ fun StyledIconButton(
                     FilledIconButton(
                         onClick = onClick,
                         enabled = enabled,
-                        modifier = Modifier.size(52.dp)
+                        modifier = Modifier.size(52.dp),
+                        shape = IconButtonDefaults.mediumRoundShape
                     ) {
                         Text(
                             text = icon,
@@ -142,7 +145,8 @@ fun StyledIconButton(
                     OutlinedIconButton(
                         onClick = onClick,
                         enabled = enabled,
-                        modifier = Modifier.size(52.dp)
+                        modifier = Modifier.size(52.dp),
+                        shape = IconButtonDefaults.mediumRoundShape
                     ) {
                         Text(
                             text = icon,
@@ -157,7 +161,8 @@ fun StyledIconButton(
                     IconButton(
                         onClick = onClick,
                         enabled = enabled,
-                        modifier = Modifier.size(52.dp)
+                        modifier = Modifier.size(52.dp),
+                        shape = IconButtonDefaults.mediumRoundShape
                     ) {
                         Text(
                             text = icon,

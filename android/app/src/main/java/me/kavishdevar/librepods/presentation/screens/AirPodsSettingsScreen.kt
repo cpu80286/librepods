@@ -641,231 +641,156 @@ fun AirPodsSettingsScreen(
 
             when (LocalDesignSystem.current) {
                 DesignSystem.Material -> {
-                    val polygons = remember {
-                        listOf(
-                            MaterialShapes.Cookie9Sided,
-                            MaterialShapes.Clover4Leaf,
-                            MaterialShapes.SoftBurst,
-                            MaterialShapes.Sunny,
-                            MaterialShapes.Pentagon,
-                            MaterialShapes.Cookie4Sided,
-                            MaterialShapes.Oval,
-                        )
-                    }
-
-                    val morphs = remember {
-                        buildList {
-                            for (i in polygons.indices) {
-                                add(
-                                    Morph(
-                                        polygons[i].normalized(),
-                                        polygons[(i + 1) % polygons.size].normalized()
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-                    var currentMorphIndex by remember { mutableIntStateOf(0) }
-
-                    val morphProgress = remember { Animatable(0f) }
-
-                    LaunchedEffect(reconnecting) {
-                        if (!reconnecting) {
-                            currentMorphIndex = 0
-                            morphProgress.snapTo(0f)
-                            return@LaunchedEffect
-                        }
-
-                        while (reconnecting) {
-                            morphProgress.snapTo(0f)
-
-                            morphProgress.animateTo(
-                                targetValue = 1f,
-                                animationSpec = tween(
-                                    durationMillis = 650,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-
-                            currentMorphIndex = (currentMorphIndex + 1) % morphs.size
-                        }
-                    }
-
-                    val path = remember { Path() }
-                    val scaleMatrix = remember { Matrix() }
-
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(horizontal = 24.dp)
                             .pointerInput(Unit) {
                                 detectTapGestures(
-                                    onLongPress = {
-                                        activateDemoMode()
+                                    onLongPress = { activateDemoMode() },
+                                    onTap = {
+                                        val now = System.currentTimeMillis()
+                                        if (now - lastTapTime.longValue > 400) {
+                                            tapCount.intValue = 0
+                                        }
+                                        tapCount.intValue++
+                                        lastTapTime.longValue = now
+                                        if (tapCount.intValue >= 5) {
+                                            tapCount.intValue = 0
+                                            activateDemoMode()
+                                        }
                                     }
                                 )
-                            }
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         Column(
                             modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(horizontal = 32.dp)
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onTap = {
-                                            val now = System.currentTimeMillis()
-
-                                            if (now - lastTapTime.longValue > 400) {
-                                                tapCount.intValue = 0
-                                            }
-
-                                            tapCount.intValue++
-                                            lastTapTime.longValue = now
-
-                                            if (tapCount.intValue >= 5) {
-                                                tapCount.intValue = 0
-                                                activateDemoMode()
-                                            }
-                                        }
-                                    )
-                                },
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .fillMaxWidth()
+                                .widthIn(max = 520.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            val primaryContainerColor = MaterialTheme.colorScheme.tertiaryContainer
-                            val secondaryContainerColor = MaterialTheme.colorScheme.secondaryContainer
+                            Text(
+                                text = "기기",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth()
+                            )
 
-                            val animatedShapeColor by animateColorAsState(if (reconnecting) primaryContainerColor else secondaryContainerColor)
+                            Spacer(Modifier.height(8.dp))
 
-                            if (state.connectionSuccessful) {
+                            Text(
+                                text = "AirPods",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(Modifier.height(28.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .size(224.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.secondaryContainer,
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(240.dp)
+                                        .size(176.dp)
                                         .background(
-                                            MaterialTheme.colorScheme.surfaceBright,
-                                            CircleShape
-                                        )
-                                        .clickable(
-                                            interactionSource = null,
-                                            indication = ripple(
-                                                bounded = false,
-                                                radius = 120.dp
-                                            ),
-                                            enabled = !reconnecting,
-                                            onClick = {}
-                                        )
-                                        .pointerInput(Unit) {
-                                            detectTapGestures(
-                                                onTap = {
-                                                    if (!reconnecting) {
-                                                        currentMorphIndex = 1
-                                                        reconnecting = true
-                                                        reconnectFromSavedMac()
-                                                    }
-                                                },
-                                                onPress = {
-                                                    if (!reconnecting) {
-                                                        morphProgress.animateTo(
-                                                            targetValue = 1f,
-                                                            animationSpec = spring(
-                                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                                stiffness = Spring.StiffnessLow
-                                                            )
-                                                        )
-                                                        tryAwaitRelease()
-                                                        morphProgress.animateTo(
-                                                            targetValue = 0f,
-                                                            animationSpec = spring(
-                                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                                stiffness = Spring.StiffnessLow
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        .drawWithContent {
-                                            val activeMorph = morphs[currentMorphIndex]
-
-                                            val shapePath = activeMorph.toPath(
-                                                progress = morphProgress.value,
-                                                path = path
-                                            )
-
-                                            val bounds = shapePath.getBounds()
-
-                                            val scale = min(
-                                                size.width / bounds.width,
-                                                size.height / bounds.height
-                                            ) * 0.8f
-
-                                            scaleMatrix.reset()
-
-                                            scaleMatrix.scale(x = scale, y = scale)
-
-                                            shapePath.transform(scaleMatrix)
-
-                                            shapePath.translate(size.center - shapePath.getBounds().center)
-
-                                            drawPath(
-                                                path = shapePath,
-                                                color = animatedShapeColor
-                                            )
-
-                                            drawContent()
-                                        },
+                                            color = MaterialTheme.colorScheme.surface,
+                                            shape = CircleShape
+                                        ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = if (reconnecting) MaterialIcons.bluetooth_searching else MaterialIcons.headset_off,
+                                        imageVector = if (reconnecting)
+                                            MaterialIcons.bluetooth_searching
+                                        else
+                                            MaterialIcons.headset_off,
                                         contentDescription = null,
-                                        modifier = Modifier.size(84.dp),
-                                        tint = if (reconnecting) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
-                                    )
-                                }
-
-                                Spacer(Modifier.height(40.dp))
-
-                                Text(
-                                    text = if (reconnecting) stringResource(R.string.reconnecting) else stringResource(R.string.tap_to_reconnect),
-                                    style = MaterialTheme.typography.labelSmallEmphasized,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            } else {
-                                Text(
-                                    text = stringResource(R.string.airpods_not_connected),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                if (sharedPreferences.getBoolean("bypass_device_check.v2", false)) {
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        text = stringResource(R.string.compatibility_check_bypassed),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = TextAlign.Center
+                                        modifier = Modifier.size(88.dp),
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
-                        }
 
-                        if (!BuildConfig.PLAY_BUILD) {
-                            OutlinedButton(
-                                onClick = navigateToTroubleshooting,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(24.dp)
-                            ) {
+                            Spacer(Modifier.height(30.dp))
+
+                            Text(
+                                text = if (reconnecting)
+                                    "기기를 찾고 있어요"
+                                else
+                                    "연결된 기기가 없어요",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            Text(
+                                text = if (reconnecting)
+                                    "AirPods 주변에서 잠시 기다려 주세요."
+                                else
+                                    "AirPods를 가까이 두고 블루투스 연결을 확인해 주세요.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+
+                            if (state.connectionSuccessful) {
+                                Spacer(Modifier.height(24.dp))
+
+                                OutlinedButton(
+                                    onClick = {
+                                        if (!reconnecting) {
+                                            reconnecting = true
+                                            reconnectFromSavedMac()
+                                        }
+                                    },
+                                    enabled = !reconnecting
+                                ) {
+                                    Text(
+                                        if (reconnecting) "연결 중..." else "다시 연결"
+                                    )
+                                }
+                            } else {
+                                Spacer(Modifier.height(24.dp))
+
                                 Text(
-                                    stringResource(
-                                        R.string.troubleshooting
-                                    ),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    text = "이전에 연결한 AirPods가 있다면 블루투스를 켠 뒤 다시 시도해 주세요.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
                                 )
+                            }
+
+                            if (sharedPreferences.getBoolean("bypass_device_check.v2", false)) {
+                                Spacer(Modifier.height(12.dp))
+
+                                Text(
+                                    text = stringResource(R.string.compatibility_check_bypassed),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            if (!BuildConfig.PLAY_BUILD) {
+                                Spacer(Modifier.height(28.dp))
+
+                                OutlinedButton(onClick = navigateToTroubleshooting) {
+                                    Text(stringResource(R.string.troubleshooting))
+                                }
                             }
                         }
                     }
                 }
-
                 DesignSystem.Apple -> {
                     Column(
                         modifier = Modifier.fillMaxWidth(),

@@ -101,6 +101,7 @@ fun StyledButton(
                 MaterialButtonStyle.Filled -> {
                     Button(
                         modifier = modifier.height(48.dp),
+                        shape = RoundedCornerShape(16.dp),
                         onClick = onClick,
                         content = content
                     )
@@ -108,6 +109,7 @@ fun StyledButton(
                 MaterialButtonStyle.Tonal -> {
                     FilledTonalButton(
                         modifier = modifier.height(48.dp),
+                        shape = RoundedCornerShape(16.dp),
                         onClick = onClick,
                         content = content,
                         colors = ButtonDefaults.filledTonalButtonColors(containerColor = surfaceColor)
@@ -117,6 +119,7 @@ fun StyledButton(
                 MaterialButtonStyle.Outlined -> {
                     OutlinedButton(
                         modifier = modifier.height(48.dp),
+                        shape = RoundedCornerShape(16.dp),
                         onClick = onClick,
                         content = content
                     )
@@ -125,6 +128,7 @@ fun StyledButton(
                 MaterialButtonStyle.Normal -> {
                     TextButton(
                         modifier = modifier.height(48.dp),
+                        shape = RoundedCornerShape(16.dp),
                         onClick = onClick,
                         content = content
                     )
